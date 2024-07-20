@@ -295,7 +295,7 @@ void writeJsonMultipleAnswersWithScores(string fn, vector<vector<Image>> imgsV, 
       }
       for (int i = n_imgs; i < 2; ++i) {
         if (i) fprintf(fp, ", ");
-        fprintf(fp, "\"attempt_%d\": []", i);
+        fprintf(fp, "\"attempt_%d\": []", (i+1));
       }
       if (full) {
           fprintf(fp, ", \"scores\": [");
