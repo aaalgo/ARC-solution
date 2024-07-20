@@ -249,6 +249,69 @@ void writeAnswersWithScores(const Sample&s, string fn, vector<Image> imgs, vecto
   fclose(fp);
 }
 
+void writeJsonMultipleAnswersWithScores(string fn, vector<vector<Image>> imgsV, vector<vector<double>> scoresV, bool full) {
+  FILE*fp = fopen(fn.c_str(), "w");
+  assert(fp);
+  fprintf(fp, "[");
+
+
+  assert(imgsV.size() == scoresV.size());
+  //if (imgs.empty()) imgs = {dummyImg}, scores = {-1};
+  //assert(imgs.size() <= 3);
+  for (int id = 0; id < imgsV.size(); ++id) {
+      auto const &imgs = imgsV[id];
+      auto const &scores = scoresV[id];
+      if (id) fprintf(fp, ", ");
+      fprintf(fp, "{");
+      assert(imgs.size() == scores.size());
+
+      unsigned n_imgs = imgs.size();
+      if ((!full) && n_imgs > 2) n_imgs = 2;
+
+      for (int i = 0; i < n_imgs; i++) {
+        if (i) fprintf(fp, ", ");
+        
+        Image_ img = imgs[i];
+        //double score = scores[i];
+        assert(img.p == point({0,0}));
+        assert(img.w >= 1 && img.w <= 30 && img.h >= 1 && img.h <= 30);
+        fprintf(fp, "\"attempt_%d\": [", (i+1));
+        for (int i = 0; i < img.h; i++) {
+            if (i) fprintf(fp, ", ");
+            fprintf(fp, "[");
+          for (int j = 0; j < img.w; j++) {
+              if (j) fprintf(fp, ", ");
+            int c = img(i,j);
+            assert(c >= 0 && c <= 9);
+            fprintf(fp, "%d", c);
+          }
+          fprintf(fp, "]");
+        }
+        fprintf(fp, "]");
+      }
+      for (int i = n_imgs; i < 2; ++i) {
+        if (i) fprintf(fp, ", ");
+        fprintf(fp, "\"attempt_%d\": []", i);
+      }
+      if (full) {
+          fprintf(fp, ", \"scores\": [");
+          for (int i = 0; i < n_imgs; i++) {
+              if (i) fprintf(fp, ", ");
+              fprintf(fp, "%.4f", scores[i]);
+
+          }
+          for (int i = n_imgs; i < 2; ++i) {
+              if (i) fprintf(fp, ", ");
+              fprintf(fp, "0");
+          }
+        fprintf(fp, "]");
+      }
+      fprintf(fp, "}");
+  }
+  fprintf(fp, "]");
+  fclose(fp);
+}
+
 void writeAnswers (const Sample&s, string fn, vector<Image> imgs, vector<double> scores) {
   FILE*fp = fopen(fn.c_str(), "w");
   assert(fp);

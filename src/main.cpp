@@ -37,6 +37,8 @@ int main(int argc, char**argv) {
     std::string output_path;
     float gigabytes = 16;
     int maxdepth = -1;
+    bool eval = false;
+    bool full = false;
     {
         bool license = false;
         CLI::App app{"Icecuber's Solution to ARC 2020 Challenge\n"
@@ -53,6 +55,8 @@ int main(int argc, char**argv) {
         app.add_option("-d,--depth", maxdepth, "")->capture_default_str();
         app.add_option("-g,--gigabytes", gigabytes)->capture_default_str();
         app.add_flag("--license", license, "");
+        app.add_flag("--eval", eval, "run with eval==1, see original README.");
+        app.add_flag("--full", full, "output all answers with scores");
         CLI11_PARSE(app, argc, argv);
         if (license) {
             std::cout << LICENSE << std::endl;
@@ -84,7 +88,7 @@ int main(int argc, char**argv) {
 }
   limit_virtual_memory(gigabytes);
 
-  run(input_path, output_path, maxdepth);
+  run(input_path, output_path, maxdepth, eval, full);
   report_resource_usage();
 }
 

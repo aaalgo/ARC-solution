@@ -56,7 +56,7 @@ int MAXSIDE = 100, MAXAREA = 40*40, MAXPIXELS = 40*40*5; //Just default values
 
 int print_times = 1, print_mem = 1, print_nodes = 1;
 
-void run (string const &input_path, string const &output_path, int arg = -1) {
+void run (string const &input_path, string const &output_path, int arg, int eval, bool full) {
 //void run(char const *name, int arg = -1) {
   int only_sid = -1;
   //rankFeatures();
@@ -73,8 +73,6 @@ void run (string const &input_path, string const &output_path, int arg = -1) {
 
   if (arg == -1) arg = 2;
   MAXDEPTH = arg % 10 * 10;
-
-  int eval = 1;
 
   int skips = 0;
 
@@ -95,6 +93,8 @@ void run (string const &input_path, string const &output_path, int arg = -1) {
 
 
   //Remember to fix Timers before running parallel
+  vector<vector<Image>> imgsV;
+  vector<vector<double>> scoresV;
 
   for (int si = 0; si < sample.size(); si++) {
 
@@ -261,7 +261,7 @@ void run (string const &input_path, string const &output_path, int arg = -1) {
     int s3 = 0;
     if (!eval) s3 = scoreAnswers(rec_answers, s.test_in, s.test_out);
 
-    if (!eval) {//!eval && s1 && !s2) {
+    if (!eval) {
       {
 	visu.next(to_string(si) + " - test");
 	for (auto&[in,out] : train) visu.add(in,out);
@@ -287,12 +287,17 @@ void run (string const &input_path, string const &output_path, int arg = -1) {
 
       writeVerdict(si, s.id, verdict[si]);
     }
-    if (output_path.size()) {
-      //Writer writer(fn);
-      //writer(s, rec_answers);
-      writeAnswersWithScores(s, output_path, rec_answers, answer_scores);
-    }
+
+    imgsV.emplace_back(std::move(rec_answers));
+    scoresV.emplace_back(std::move(answer_scores));
+
   }
+
+if (output_path.size()) {
+  //Writer writer(fn);
+  //writer(s, rec_answers);
+  writeJsonMultipleAnswersWithScores(output_path, imgsV, scoresV, full);
+}
 
 
   //auto now = []() {return chrono::steady_clock::now().time_since_epoch().count()/1e9;};
