@@ -1,1 +1,1 @@
-void run(int only_sid = -1, int maxdepth = -1);
+void run (string const &, string const &, int maxdepth = -1);

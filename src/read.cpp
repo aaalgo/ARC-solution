@@ -141,6 +141,20 @@ Image Sample::readImage() {
   return ret;
 }
 
+vector<Sample> readOne(string path) { //maxn = -1
+
+  vector<string> files{path};
+  vector<Sample> sample;
+  for (string sid : files) {
+    //sample.push_back(Sample(sid));
+    for (Sample s : Sample(sid).split()) {
+      //if (maxn < 0 || sample.size() < maxn)
+      sample.push_back(s);
+    }
+  }
+  return sample;
+}
+
 
 vector<Sample> readAll(string path, int maxn) { //maxn = -1
   const string base_path[2] = {"/kaggle/input/abstraction-and-reasoning-challenge/", "./dataset/"};
@@ -211,6 +225,33 @@ void writeAnswersWithScores(const Sample&s, string fn, vector<Image> imgs, vecto
   FILE*fp = fopen(fn.c_str(), "w");
   assert(fp);
   fprintf(fp, "%s_%d\n", s.id.c_str(), s.id_ind);
+  assert(imgs.size() == scores.size());
+  if (imgs.empty()) imgs = {dummyImg}, scores = {-1};
+  assert(imgs.size() <= 3);
+
+  for (int i = 0; i < imgs.size(); i++) {
+    Image_ img = imgs[i];
+    double score = scores[i];
+    assert(img.p == point({0,0}));
+    assert(img.w >= 1 && img.w <= 30 && img.h >= 1 && img.h <= 30);
+    fprintf(fp, "|");
+    for (int i = 0; i < img.h; i++) {
+      for (int j = 0; j < img.w; j++) {
+	int c = img(i,j);
+	assert(c >= 0 && c <= 9);
+	fprintf(fp, "%d", c);
+      }
+      fprintf(fp, "|");
+    }
+    fprintf(fp, " %.20f", score);
+    fprintf(fp, "\n");
+  }
+  fclose(fp);
+}
+
+void writeAnswers (const Sample&s, string fn, vector<Image> imgs, vector<double> scores) {
+  FILE*fp = fopen(fn.c_str(), "w");
+  assert(fp);
   assert(imgs.size() == scores.size());
   if (imgs.empty()) imgs = {dummyImg}, scores = {-1};
   assert(imgs.size() <= 3);

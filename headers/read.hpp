@@ -16,6 +16,7 @@ struct Sample {
 };
 
 vector<Sample> readAll(string path, int maxn);
+vector<Sample> readOne(string path);
 
 struct Writer {
   FILE*fp;

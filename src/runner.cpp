@@ -56,7 +56,9 @@ int MAXSIDE = 100, MAXAREA = 40*40, MAXPIXELS = 40*40*5; //Just default values
 
 int print_times = 1, print_mem = 1, print_nodes = 1;
 
-void run(int only_sid = -1, int arg = -1) {
+void run (string const &input_path, string const &output_path, int arg = -1) {
+//void run(char const *name, int arg = -1) {
+  int only_sid = -1;
   //rankFeatures();
   //evalNormalizeRigid();
   //evalTasks();
@@ -72,21 +74,15 @@ void run(int only_sid = -1, int arg = -1) {
   if (arg == -1) arg = 2;
   MAXDEPTH = arg % 10 * 10;
 
-  int eval = 0;
+  int eval = 1;
 
   int skips = 0;
 
-  string sample_dir = "evaluation";
-  int samples = -1;
-  if (eval) {
-    sample_dir = "test";
-    samples = -1;
-  }
 
   /*vector<Sample> sample = readAll("evaluation", -1);
   samples = sample.size();
   sample = vector<Sample>(sample.begin()+samples-100,sample.end());*/
-  vector<Sample> sample = readAll(sample_dir, samples);
+  vector<Sample> sample = readOne(input_path);
   //sample = vector<Sample>(sample.begin()+200, sample.begin()+300);
 
   int scores[4] = {};
@@ -96,21 +92,11 @@ void run(int only_sid = -1, int arg = -1) {
   vector<int> verdict(sample.size());
 
   int dones = 0;
-  Loader load(sample.size());
 
 
-  assert(only_sid < sample.size());
   //Remember to fix Timers before running parallel
 
   for (int si = 0; si < sample.size(); si++) {
-    if (only_sid != -1 && si != only_sid) continue;
-
-    //if (si == 30) assert(0);
-
-    if (eval) load();
-    else if (++dones % 10 == 0) {
-      cout << dones << " / " << sample.size() << endl;
-    }
 
     const Sample&s = sample[si];
 
@@ -301,11 +287,10 @@ void run(int only_sid = -1, int arg = -1) {
 
       writeVerdict(si, s.id, verdict[si]);
     }
-    {
-      string fn = "output/answer_"+to_string(only_sid)+"_"+to_string(arg)+".csv";
+    if (output_path.size()) {
       //Writer writer(fn);
       //writer(s, rec_answers);
-      writeAnswersWithScores(s, fn, rec_answers, answer_scores);
+      writeAnswersWithScores(s, output_path, rec_answers, answer_scores);
     }
   }
 
@@ -313,7 +298,7 @@ void run(int only_sid = -1, int arg = -1) {
   //auto now = []() {return chrono::steady_clock::now().time_since_epoch().count()/1e9;};
   //for (double start = now(); now() < start+10;);
 
-  if (!eval && only_sid == -1) {
+  if (only_sid == -1) {
     for (int si = 0; si < sample.size(); si++) {
       Sample&s = sample[si];
       writeVerdict(si, s.id, verdict[si]);
